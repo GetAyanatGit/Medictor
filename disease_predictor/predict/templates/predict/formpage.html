@@ -1,0 +1,28 @@
+{% extends 'predict/base.html' %}
+{% load crispy_forms_tags %}
+
+
+{% block content %}
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form|crispy }}
+    <br>
+    <button type="submit" class="btn btn-success">See Possibilities</button>
+  </form>
+
+  {% if messages %}
+  
+  <div class="alert alert-danger{% if messages.tags %} alert-{{ messages.tags }}{% endif %}">
+    {{ messages|safe }}
+  </div>
+
+{% endif %}
+
+
+{% endblock content %}
+
+
+    
+   
+
