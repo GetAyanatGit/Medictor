@@ -20,7 +20,7 @@ from django.urls import path,include
 from . import views
 
 
+# This is still now an one-page application, thus only assigned to the root url
 urlpatterns = [
     path('',views.get_name,name='formpage'),
-    path('thankpage',views.thanksview),
 ]

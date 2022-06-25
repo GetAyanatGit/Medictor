@@ -1,3 +1,9 @@
+# Note in our forms.py file in order to provide options to the user, we have
+# prepared a list of symtpoms, pairs of cleaned and uncleaned versions of each
+# We have used this file to prepare the same
+# As of now it is manually handled, will be kept in scheduler going forward
+# For raw data refer to machine learning model in Kaggle
+
 raw = ['itching', 'skin_rash', 'nodal_skin_eruptions',
        'continuous_sneezing', 'shivering', 'chills', 'joint_pain',
        'stomach_pain', 'acidity', 'ulcers_on_tongue', 'muscle_wasting',

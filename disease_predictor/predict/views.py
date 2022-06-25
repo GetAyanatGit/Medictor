@@ -9,12 +9,17 @@ import pandas as pd
 import numpy as np
 from django.contrib import messages
 
-
+# Will be the resultant prediction
 predicted_disease = ''
 
-model = pickle.load(open(r"C:\Users\Ayan Mukherjee\Desktop\DISEASE_PREDICTOR\disease_predictor\predict\svc_ml_model.sav", "rb"))
-df1 = pd.read_csv(r'C:\Users\Ayan Mukherjee\Desktop\DISEASE_PREDICTOR\disease_predictor\svcmodel\Symptom-severity.csv')
+# We are loading our machine learning model dump here
+# To know how we created dump refer to machine learning model in Kaggle
 
+model = pickle.load(open(r"C:\Users\Ayan Mukherjee\Desktop\DISEASE_PREDICTOR\disease_predictor\predict\svc_ml_model.sav", "rb"))
+
+# In order to process label encoded input for our machine learning model
+# we need to know the encoding values for each input symptoms and process them to the model
+df1 = pd.read_csv(r'C:\Users\Ayan Mukherjee\Desktop\DISEASE_PREDICTOR\disease_predictor\svcmodel\Symptom-severity.csv')
 a = np.array(df1["Symptom"])
 b = np.array(df1["weight"])
 
@@ -23,9 +28,11 @@ processed = [('itching', 'Itching'), ('skin_rash', 'Skin rash'), ('nodal_skin_er
 
 
 
+# This is still now an one-page application, thus only has one view
 
 def get_name(request):
-    empty_flag = ''
+    empty_flag = '' # As of now no inputs, doesn't matter if all inputs are empty
+
     # if this is a POST request we need to process the form data
     if request.method == 'POST':
         request.method = 'None'
@@ -37,66 +44,73 @@ def get_name(request):
         # check whether it's valid:
         if form.is_valid():
             # process the data in form.cleaned_data as required
-            # ...
-            # redirect to a new URL:
             data = form.cleaned_data
+
+            # Cleaned data is a dictionary hence we have to fetch the values in an array
             symptom_lists = list(data.keys())
             symptoms = []
             for i in symptom_lists:
                 symptoms.append(data[i])
 
+            # Now hashing with the keys we have taken the symptoms in a list
+            
+            # Setting up a counter to track input deplicaices
             c = Counter(symptoms)
+
+            # Pro-actively encoding the value of 'None' in symptoms to 0 since it will have no weightage
             for i in range(0,len(symptoms)):
                 if symptoms[i] == 'None':
                     symptoms[i] = 0
 
+            # Note that we have made a counter but 
             if c['None']==5:
                 print('Entering')
                 print('At least one entry required') # error msg
-                empty_flag = 'all_empty'
-               # messages.error(request,'username or password not correct')
-               # time.sleep(5)
-                #return(redirect('formpage'))
-                #return render(request, 'predict/formpage.html', {'form':form})
+                empty_flag = 'all_empty' # Empty flag is set to 0
+               
             
             else:
                 print(symptoms)
+                # Encoding Symptoms numerical values for ML input
                 for j in range(len(symptoms)):
                     for k in range(len(a)):
                         if symptoms[j]==a[k]:
                             symptoms[j]=b[k]
                         
-
+                # Refer to ML model in Kaggle, we have decided to consider the 1st 5 features only
+                # Hence weightage of the rest 13 is set to 0
                 nulls = [0,0,0,0,0,0,0,0,0,0,0,0]
+                
+                # Input features to be predicted against
                 psy = [symptoms + nulls]
 
+                # Assigning the returned answer to predicted variable
                 predicted = model.predict(psy)
                 print(predicted[0])
                 predicted_disease = predicted[0]
+
+
             if empty_flag == 'all_empty':
                 pass
-                #messages.error(request,'username or password not correct')
-                #return render(request, 'predict/formpage.html', {'form': form})
+                # Simply pass away
             else:
-                #return render(request,'predict/thanks.html',{'predicted_disease':predicted_disease})
+                #  This means user posted with some symptoms
+                #  Send the result as a message to the front end
+
                 message = 'Patient has symptoms of ' + predicted_disease
                 return render(request, 'predict/formpage.html', {'form': form,'messages': message})
-            #print(c.values())
-            #return HttpResponseRedirect('thankpage')
-
-    # if a GET (or any other method) we'll create a blank form
+            
     else:
+        # If there is no POST request yet, then we just need to initialize blank form
         print('else part')
         form = SymptomsForm()
 
     if empty_flag == 'all_empty':
-        #messages.error(request,'username or password not correct')
+        # As per this flag alert the user
         return render(request, 'predict/formpage.html', {'form': form,'messages': 'At least One Input Required !!'})
     else:
+        # Else if there is no request simply render the blank form
         return render(request, 'predict/formpage.html', {'form': form})
 
 
-
-def thanksview(request):
-    return render(request,'predict/thanks.html',{'predicted_disease':predicted_disease})
 
